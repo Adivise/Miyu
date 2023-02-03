@@ -8,7 +8,7 @@ module.exports = async (client, player) => {
 
     const embed = new EmbedBuilder()
         .setColor(client.color)
-        .setDescription("Queue is Empty!")
+        .setDescription("`📛` | *Song has been:* `Ended`");
     
     channel.send({ embeds: [embed] });
     return player.destroy();
