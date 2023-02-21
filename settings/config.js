@@ -2,9 +2,9 @@ require("dotenv").config();
 
 module.exports = {
     TOKEN: process.env.TOKEN || "YOUR_TOKEN_BOT",
-    PREFIX: process.env.PREFIX || "#",
     OWNER_ID: process.env.OWNER_ID || "YOUR_DISCORD_OWNER_ID",
     EMBED_COLOR: process.env.EMBED_COLOR || "#000001",
+    SEARCH_DEFAULT: ["yoasobi", "zutomayo", "kotoha", "lisa"],
     SEARCH_ENGINE: process.env.SEARCH_ENGINE || "youtube", // default -- 'youtube' | 'soundcloud' | 'youtube_music'
     LEAVE_EMPTY: process.env.LEAVE_EMPTY || "120000",
     NODES: [

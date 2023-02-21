@@ -1,29 +1,34 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 
 module.exports = { 
-    config: {
-        name: "volume",
-        aliases: ["vol", "v"],
-        description: "Adjusts the volume of the bot.",
-        accessableby: "Member",
-        category: "Music",
-        usage: "<integer>"
-    },
-    run: async (client, message, args) => {
-		const player = client.manager.players.get(message.guild.id);
-		if (!player) return message.reply(`No playing in this guild!`);
-        const { channel } = message.member.voice;
-        if (!channel || message.member.voice.channel !== message.guild.members.me.voice.channel) return message.reply(`I'm not in the same voice channel as you!`);
+    name: ["music", "volume"],
+    description: "Adjusts the volume of the bot.",
+    category: "Music",
+    options: [
+        {
+            name: "amount",
+            description: "The amount of volume to set the bot to.",
+            type: ApplicationCommandOptionType.Integer,
+            required: false,
+            min_value: 1,
+            max_value: 100
+        }
+    ],
+    run: async (client, interaction) => {
+		const player = client.manager.players.get(interaction.guild.id);
+		if (!player) return interaction.reply(`No playing in this guild!`);
+        const { channel } = interaction.member.voice;
+        if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.reply(`I'm not in the same voice channel as you!`);
 
-        if (!args[0]) return message.reply(`*Current volume:* ${player.volume}%`);
-        if (Number(args[0]) <= 0 || Number(args[0]) > 100) return message.reply(`Please provide a volume between 1 and 100.`);
+        const value = interaction.options.getInteger("amount");
+        if (!value) return interaction.reply(`*Current volume:* ${player.volume}%`);
 
-        await player.setVolume(Number(args[0]));
+        await player.setVolume(Number(value));
 
         const embed = new EmbedBuilder()
-            .setDescription(`\`🔈\` | *Volume set to:* \`${args[0]}%\``)
+            .setDescription(`\`🔈\` | *Volume set to:* \`${value}%\``)
             .setColor(client.color);
         
-        return message.reply({ embeds: [embed] });
+        return interaction.reply({ embeds: [embed] });
     }
 }

@@ -1,20 +1,25 @@
 const lyricsfinder = require('lyrics-finder');
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 
 module.exports = { 
-    config: {
-        name: "lyrics",
-        description: "Display lyrics of a song",
-        accessableby: "Member",
-        category: "Music",
-    },
-    run: async (client, message, args) => {
-        const player = client.manager.players.get(message.guild.id);
-        if (!player) return message.reply(`No playing in this guild!`);
-        const { channel } = message.member.voice;
-        if (!channel || message.member.voice.channel !== message.guild.members.me.voice.channel) return message.reply(`I'm not in the same voice channel as you!`);
+    name: ["music", "lyric"],
+    description: "Display lyrics of a song.",
+    category: "Music",
+    options: [
+        {
+            name: "result",
+            description: "Song name to return lyrics for.",
+            type: ApplicationCommandOptionType.String,
+            required: false,
+        }
+    ],
+    run: async (client, interaction) => {
+        const player = client.manager.players.get(interaction.guild.id);
+        if (!player) return interaction.reply(`No playing in this guild!`);
+        const { channel } = interaction.member.voice;
+        if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.reply(`I'm not in the same voice channel as you!`);
 
-        let song = args.join(" ");
+        const song = interaction.options.getString("result");
         let CurrentSong = player.queue.current;
         if (!song && CurrentSong) song = CurrentSong.title;
 
@@ -22,10 +27,10 @@ module.exports = {
 
         try {
             lyrics = await lyricsfinder(song, "");
-            if (!lyrics) return message.reply(`No lyrics found for ${song}`);
+            if (!lyrics) return interaction.reply(`No lyrics found for ${song}`);
         } catch (err) {
             console.log(err);
-            return message.reply(`No lyrics found for ${song}`);
+            return interaction.reply(`No lyrics found for ${song}`);
         }
         let lyricsEmbed = new EmbedBuilder()
             .setColor(client.color)
@@ -37,6 +42,6 @@ module.exports = {
         if (lyrics.length > 2048) {
             lyricsEmbed.setDescription(`Lyrics are too long to display!`);
         }
-        message.reply({ content: ' ', embeds: [lyricsEmbed] });
+        interaction.reply({ content: ' ', embeds: [lyricsEmbed] });
     }
 };

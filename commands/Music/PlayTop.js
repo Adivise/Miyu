@@ -1,48 +1,58 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 const { convertTime } = require("../../structures/ConvertTime.js");
 
 module.exports = {
-    config: {
-        name: "playtop",
-        description: "Queue song to the top!",
-        usage: "<results>",
-        category: "Music",
-        accessableby: "Member",
-        aliases: ["tplay", "topplay"]
-    },
-    run: async (client, message, args) => {
-        if(!args[0]) return message.reply("Please provide song name.");
+    name: ["music", "playtop"],
+    description: "Queue song to the top!",
+    category: "Music",
+    options: [
+        {
+            name: "search",
+            type: ApplicationCommandOptionType.String,
+            description: "The song to play.",
+            required: true,
+            autocomplete: true
+        }
+    ],
+    run: async (client, interaction) => {
+        try {
+            if (interaction.options.getString("search")) {
+                const player = client.manager.players.get(interaction.guild.id);
+                if (!player) return interaction.reply(`No playing in this guild!`);
+                const { channel } = interaction.member.voice;
+                if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.reply(`I'm not in the same voice channel as you!`);
+        
+                await interaction.reply(`🔍 **Searching...** \`${interaction.options.getString("search")}\``);
 
-		const player = client.manager.players.get(message.guild.id);
-		if (!player) return message.reply(`No playing in this guild!`);
-        const { channel } = message.member.voice;
-        if (!channel || message.member.voice.channel !== message.guild.members.me.voice.channel) return message.reply(`I'm not in the same voice channel as you!`);
-
-        const res = await player.search(args, { requester: message.author });
-        if (!res.tracks.length) return message.reply("No results found!");
-
-        if (res.type === "PLAYLIST") {
-            const queues = player.queue.size;
-            for (let track of res.tracks) player.queue.add(track);
-            
-            // your have another tick? pls contributor
-            Playlist(player, queues);
-
-            const embed = new EmbedBuilder()
-                .setColor(client.color)
-                .setDescription(`**Shifted • [${res.playlistName}](${args})** \`${convertTime(player.queue.durationLength, true)}\` (${res.tracks.length} tracks) • ${res.tracks[0].requester}`)
-
-            return message.reply({ embeds: [embed] })
-        } else {
-            player.queue.add(res.tracks[0]);
-
-            Normal(player);
-
-            const embed = new EmbedBuilder()
-                .setColor(client.color)
-                .setDescription(`**Shifted • [${res.tracks[0].title}](${res.tracks[0].uri})** \`${convertTime(res.tracks[0].length, true)}\` • ${res.tracks[0].requester}`)
-
-            return message.reply({ embeds: [embed] })
+                const string = interaction.options.getString("search");
+                const res = await player.search(string, { requester: interaction.user });
+                if (!res.tracks.length) return interaction.editReply("No results found!");
+        
+                if (res.type === "PLAYLIST") {
+                    const queues = player.queue.size;
+                    for (let track of res.tracks) player.queue.add(track);
+                    
+                    Playlist(player, queues);
+        
+                    const embed = new EmbedBuilder()
+                        .setColor(client.color)
+                        .setDescription(`**Shifted • [${res.playlistName}](${string})** \`${convertTime(player.queue.durationLength, true)}\` (${res.tracks.length} tracks) • ${res.tracks[0].requester}`)
+        
+                    return interaction.editReply({ content: " ", embeds: [embed] })
+                } else {
+                    player.queue.add(res.tracks[0]);
+        
+                    Normal(player);
+        
+                    const embed = new EmbedBuilder()
+                        .setColor(client.color)
+                        .setDescription(`**Shifted • [${res.tracks[0].title}](${res.tracks[0].uri})** \`${convertTime(res.tracks[0].length, true)}\` • ${res.tracks[0].requester}`)
+        
+                    return interaction.editReply({ content: " ", embeds: [embed] })
+                }
+            }
+        } catch {
+            //
         }
     }
 }

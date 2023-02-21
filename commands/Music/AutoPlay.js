@@ -1,17 +1,14 @@
 const { EmbedBuilder } = require('discord.js');
 
 module.exports = { 
-    config: {
-        name: "autoplay",
-        description: "Auto play music in voice channel.",
-        accessableby: "Member",
-        category: "Music"
-    },
-    run: async (client, message, args) => {
-        const player = client.manager.players.get(message.guild.id);
-        if (!player) return message.reply(`No playing in this guild!`);
-        const { channel } = message.member.voice;
-        if (!channel || message.member.voice.channel !== message.guild.members.me.voice.channel) return message.reply(`I'm not in the same voice channel as you!`);
+    name: ["music", "autoplay"],
+    description: "Autoplay music (Random play songs)",
+    category: "Music",
+    run: async (client, interaction) => {
+        const player = client.manager.players.get(interaction.guild.id);
+        if (!player) return interaction.reply(`No playing in this guild!`);
+        const { channel } = interaction.member.voice;
+        if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.reply(`I'm not in the same voice channel as you!`);
         
         if (player.data.get("autoplay")) { // get undifined = turn on + set data
             await player.data.set("autoplay", false);
@@ -21,15 +18,15 @@ module.exports = {
                 .setDescription("`📻` | *Autoplay has been:* `Deactivated`")
                 .setColor(client.color);
 
-            return message.reply({ embeds: [embed] });
+            return interaction.reply({ embeds: [embed] });
         } else {
             const identifier = player.queue.current.identifier;
             const search = `https://www.youtube.com/watch?v=${identifier}&list=RD${identifier}`;
-            const res = await player.search(search, { requester: message.author });
-            if (!res.tracks.length) return message.reply(`Engine \`${player.queue.current.sourceName}\` not support!`);
+            const res = await player.search(search, { requester: interaction.user });
+            if (!res.tracks.length) return interaction.reply(`Engine \`${player.queue.current.sourceName}\` not support!`);
 
             await player.data.set("autoplay", true);
-            await player.data.set("requester", message.author);
+            await player.data.set("requester", interaction.user);
             await player.data.set("identifier", identifier);
             await player.queue.add(res.tracks[1]);
 
@@ -37,7 +34,7 @@ module.exports = {
                 .setDescription("`📻` | *Autoplay has been:* `Activated`")
                 .setColor(client.color);
 
-            return message.reply({ embeds: [embed] });
+            return interaction.reply({ embeds: [embed] });
         }
     }
 };

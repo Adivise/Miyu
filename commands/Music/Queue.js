@@ -1,20 +1,28 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 const { NormalPage } = require('../../structures/PageQueue.js');
 const formatDuration = require('../../structures/FormatDuration.js');
 
 module.exports = { 
-    config: {
-        name: "queue",
-        aliases: ["q"],
-        description: "Displays what the current queue is.",
-        accessableby: "Member",
-        category: "Music",
-    },
-    run: async (client, message, args) => {
-		const player = client.manager.players.get(message.guild.id);
-		if (!player) return message.reply(`No playing in this guild!`);
-        const { channel } = message.member.voice;
-        if (!channel || message.member.voice.channel !== message.guild.members.me.voice.channel) return message.reply(`I'm not in the same voice channel as you!`);
+    name: ["queue"],
+    description: "Show the queue of songs.",
+    category: "Music",
+    options: [
+        {
+            name: "page",
+            description: "Page number to show.",
+            type: ApplicationCommandOptionType.Integer,
+            required: false,
+        }
+    ],
+    run: async (client, interaction) => {
+		await interaction.deferReply({ ephemeral: false });
+
+		const player = client.manager.players.get(interaction.guild.id);
+		if (!player) return interaction.editReply(`No playing in this guild!`);
+        const { channel } = interaction.member.voice;
+        if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.editReply(`I'm not in the same voice channel as you!`);
+
+		const args = interaction.options.getInteger("page");
 
 		const song = player.queue.current;
 		const qduration = formatDuration(player.queue.durationLength + song.length);
@@ -35,7 +43,7 @@ module.exports = {
 			const str = songStrings.slice(i * 10, i * 10 + 10).join('');
 
 			const embed = new EmbedBuilder()
-                .setAuthor({ name: `Queue - ${message.guild.name}`, iconURL: message.guild.iconURL({ dynamic: true }) })
+                .setAuthor({ name: `Queue - ${interaction.guild.name}`, iconURL: interaction.guild.iconURL({ dynamic: true }) })
 				.setColor(client.color) //**Currently Playing:**\n**[${song.title}](${song.uri})** \`[${formatDuration(song.duration)}]\` • ${song.requester}\n\n**Rest of queue**:${str == '' ? '  Nothing' : '\n' + str}
 				.setDescription(`**Currently Playing**\n[${song.title}](${song.uri}) \`[${formatDuration(song.length)}]\` • ${song.requester}\n\n**Rest of queue**:${str == '' ? '  Nothing' : '\n' + str}`) //Page • ${i + 1}/${pagesNum} | ${player.queue.length} • Song | ${qduration} • Total duration
 				.setFooter({ text: `Page • ${i + 1}/${pagesNum} | ${player.queue.length} • Song/s | ${qduration} • Total Duration` });
@@ -49,14 +57,14 @@ module.exports = {
 			pages.push(embed);
 		}
 
-		if (!args[0]) {
-			if (pages.length == pagesNum && player.queue.length > 10) NormalPage(client, message, pages, 60000, player.queue.length, qduration);
-			else return message.reply({ embeds: [pages[0]] });
+		if (!args) {
+			if (pages.length == pagesNum && player.queue.length > 10) NormalPage(client, interaction, pages, 60000, player.queue.length, qduration);
+			else return interaction.editReply({ embeds: [pages[0]] });
 		} else {
-			if (isNaN(args[0])) return message.reply(`Please enter a number!`);
-			if (args[0] > pagesNum) return message.reply(`There are only ${pagesNum} pages available!`);
-			const pageNum = args[0] == 0 ? 1 : args[0] - 1;
-			return message.reply({ embeds: [pages[pageNum]] });
+			if (isNaN(args)) return interaction.editReply(`Please enter a number!`);
+			if (args > pagesNum) return interaction.editReply(`There are only ${pagesNum} pages available!`);
+			const pageNum = args == 0 ? 1 : args - 1;
+			return interaction.editReply({ embeds: [pages[pageNum]] });
 		}
 	}
 };

@@ -1,27 +1,36 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
 
 module.exports = { 
-    config: {
-        name: "move",
-        description: "Move position song in queue!",
-        usage: "<3 1>",
-        category: "Music",
-        accessableby: "Member"
-    },
-    run: async (client, message, args) => {
-		const player = client.manager.players.get(message.guild.id);
-		if (!player) return message.reply(`No playing in this guild!`);
-        const { channel } = message.member.voice;
-        if (!channel || message.member.voice.channel !== message.guild.members.me.voice.channel) return message.reply(`I'm not in the same voice channel as you!`);
+    name: ["music", "move"],
+    description: "Change a songs position in a queue.",
+    category: "Music",
+    options: [
+        {
+            name: "from",
+            description: "The queue number of the song",
+            type: ApplicationCommandOptionType.Integer,
+            required: true,
+            min_value: 1
+        },
+        {
+            name: "to",
+            description: "The position in queue you want to move",
+            type: ApplicationCommandOptionType.Integer,
+            required: true,
+            min_value: 1
+        }
+    ],
+    run: async (client, interaction) => {
+		const player = client.manager.players.get(interaction.guild.id);
+		if (!player) return interaction.reply(`No playing in this guild!`);
+        const { channel } = interaction.member.voice;
+        if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.reply(`I'm not in the same voice channel as you!`);
 
-        const tracks = args[0];
-        const position = args[1];
+        const tracks = interaction.options.getInteger("from");
+        const position = interaction.options.getInteger("to");
 
-        if (isNaN(tracks) || isNaN(position)) return message.reply(`Please enter a valid number in the queue! ${client.prefix}move <from> <to>`);
-
-        if (tracks == 0 && position == 0) return message.reply(`Cannot remove a song that is already playing`);
-        if (tracks > player.queue.length || (tracks && !player.queue[tracks - 1])) return message.reply(`Song not found.`);
-        if ((position > player.queue.length) || !player.queue[position - 1]) return message.reply(`Song not found.`);
+        if (tracks > player.queue.length || (tracks && !player.queue[tracks - 1])) return interaction.reply(`Song not found.`);
+        if ((position > player.queue.length) || !player.queue[position - 1]) return interaction.reply(`Song not found.`);
 
         const song = player.queue[tracks - 1];
 
@@ -32,6 +41,6 @@ module.exports = {
             .setColor(client.color)
             .setDescription(`**Moved • [${song.title}](${song.uri})** to ${position}`)
 
-        return message.reply({ embeds: [embed] });
+        return interaction.reply({ embeds: [embed] });
     }
 }

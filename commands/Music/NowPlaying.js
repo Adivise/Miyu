@@ -3,23 +3,16 @@ const { convertQueue } = require("../../structures/ConvertTime.js");
 const { EmbedBuilder } = require("discord.js");
 
 module.exports = { 
-    config: {
-        name: "nowplaying",
-        aliases: ["np", "now"],
-        description: "Display the song currently playing.",
-        accessableby: "Member",
-        category: "Music",
-    },
-
-    run: async (client, message, args) => {
-        const player = client.manager.players.get(message.guild.id);
-        if (!player) return message.reply(`No playing in this guild!`);
+    name: ["nowplaying"],
+    description: "Display the song currently playing.",
+    category: "Music",
+    run: async (client, interaction) => {
+        const player = client.manager.players.get(interaction.guild.id);
+        if (!player) return interaction.reply(`No playing in this guild!`);
 
         const song = player.queue.current;
         const CurrentDuration = formatDuration(player.position);
         const TotalDuration = formatDuration(song.length);
-
-        console.log(song.sourceName)
 
         const Part = Math.floor(player.position / song.length * 30);
         const Emoji = player.playing ? "🔴 |" : "⏸ |";
@@ -43,6 +36,6 @@ module.exports = {
             embed.setThumbnail(client.user.displayAvatarURL());
         }
       
-        return message.reply({ content: " ", embeds: [embed] });
+        return interaction.reply({ content: " ", embeds: [embed] });
     }
 }

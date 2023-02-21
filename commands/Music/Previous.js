@@ -2,26 +2,23 @@ const { EmbedBuilder } = require('discord.js');
 const { KazagumoTrack } = require('kazagumo');
 
 module.exports = { 
-    config: {
-        name: "previous",
-        description: "Previous a song!",
-        accessableby: "Member",
-        category: "Music"
-    },
-    run: async (client, message, args) => {
-        const player = client.manager.players.get(message.guild.id);
-        if (!player) return message.reply(`No playing in this guild!`);
-        const { channel } = message.member.voice;
-        if (!channel || message.member.voice.channel !== message.guild.members.me.voice.channel) return message.reply(`I'm not in the same voice channel as you!`);
+    name: ["music", "previous"],
+    description: "Play the previous song in the queue.",
+    category: "Music",
+    run: async (client, interaction) => {
+        const player = client.manager.players.get(interaction.guild.id);
+        if (!player) return interaction.reply(`No playing in this guild!`);
+        const { channel } = interaction.member.voice;
+        if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.reply(`I'm not in the same voice channel as you!`);
 
-        if (!player.queue.previous) return message.reply(`No previous song/s not found`);
+        if (!player.queue.previous) return interaction.reply(`No previous song/s not found`);
 
-        await player.play(new KazagumoTrack(player.queue.previous.getRaw(), message.author));
+        await player.play(new KazagumoTrack(player.queue.previous.getRaw(), interaction.user));
 
         const embed = new EmbedBuilder()
             .setDescription("`⏮` | *Song has been:* `Previous`")
             .setColor(client.color);
 
-        return message.reply({ embeds: [embed] });
+        return interaction.reply({ embeds: [embed] });
     }
 }

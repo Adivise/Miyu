@@ -8,8 +8,7 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildVoiceStates
     ],
     allowedMentions: { parse: ["users", "roles"] },
 });
@@ -29,7 +28,7 @@ client.manager = new Kazagumo({
     }
 }, new Connectors.DiscordJS(client), client.config.NODES);
 
-["aliases", "commands"].forEach(x => client[x] = new Collection());
+["commands"].forEach(x => client[x] = new Collection());
 ["loadCommand", "loadEvent", "loadPlayer", "loadTrack"].forEach(x => require(`./handlers/${x}`)(client));
 
 client.login(client.token);

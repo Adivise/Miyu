@@ -1,21 +1,36 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 
 module.exports = {
-    config: {
-        name: "loop",
-        aliases: ["repeat"],
-        description: "Loop song in queue!",
-        accessableby: "Member",
-        category: "Music",
-        usage: "<current, all>"
-    },
-    run: async (client, message, args) => {
-		const player = client.manager.players.get(message.guild.id);
-		if (!player) return message.reply(`No playing in this guild!`);
-        const { channel } = message.member.voice;
-        if (!channel || message.member.voice.channel !== message.guild.members.me.voice.channel) return message.reply(`I'm not in the same voice channel as you!`);
+    name: ["music", "loop"],
+    description: "Loops the current song!",
+    category: "Music",
+    options: [
+        {
+            name: "mode",
+            description: "What mode do you want to loop?",
+            type: ApplicationCommandOptionType.String,
+            required: true,
+            choices: [
+                {
+                    name: "Current 🔂",
+                    value: "current"
+                },
+                {
+                    name: "Queue 🔁",
+                    value: "queue"
+                }
+            ]
+        }
+    ],
+    run: async (client, interaction) => {
+		const player = client.manager.players.get(interaction.guild.id);
+		if (!player) return interaction.reply(`No playing in this guild!`);
+        const { channel } = interaction.member.voice;
+        if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.reply(`I'm not in the same voice channel as you!`);
 
-		if (!args[0] || args[0].toLowerCase() == 'current') {
+		const choice = interaction.options.getString("mode");
+
+		if (choice == 'current') {
 			if (player.loop === "none") {
 				player.setLoop("track");
 
@@ -23,7 +38,7 @@ module.exports = {
 					.setDescription(`\`🔁\` | *Song has been:* \`Looped\``)
 					.setColor(client.color);
 
-				message.reply({ embeds: [embed] });
+				interaction.reply({ embeds: [embed] });
 			} else {
 				player.setLoop("none")
 
@@ -31,25 +46,25 @@ module.exports = {
 					.setDescription(`\`🔁\` | *Song has been:* \`Unlooped\``)
 					.setColor(client.color);
 
-				message.reply({ embeds: [embed] });
+				interaction.reply({ embeds: [embed] });
 			}
-		} else if (args[0] == 'all') {
+		} else if (choice == 'queue') {
 			if (player.loop === "queue") {
 				player.setLoop("none")
 
-				const embed = new EmbedBuilder() //// this is unloop all in queue!
+				const embed = new EmbedBuilder()
 					.setDescription(`\`🔁\` | *Loop all has been:* \`Disabled\``)
 					.setColor(client.color);
 
-				message.reply({ embeds: [embed] });
+				interaction.reply({ embeds: [embed] });
 			} else {
 				player.setLoop("queue")
 
-				const embed = new EmbedBuilder() // this is loop all in queue!
+				const embed = new EmbedBuilder()
 					.setDescription(`\`🔁\` | *Loop all has been:* \`Enabled\``)
 					.setColor(client.color);
 
-				message.reply({ embeds: [embed] });
+				interaction.reply({ embeds: [embed] });
 			}
 		}
 	}

@@ -1,42 +1,49 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js');
 const formatDuration = require('../../structures/FormatDuration.js')
 
 const fastForwardNum = 10;
 
 module.exports = { 
-    config: {
-        name: "forward",
-        description: "Forward timestamp in the song!",
-        accessableby: "Member",
-        category: "Music",
-        usage: "<integer>"
-    },
-    run: async (client, message, args) => {
-		const player = client.manager.players.get(message.guild.id);
-		if (!player) return message.reply(`No playing in this guild!`);
-        const { channel } = message.member.voice;
-        if (!channel || message.member.voice.channel !== message.guild.members.me.voice.channel) return message.reply(`I'm not in the same voice channel as you!`);
+    name: ["music", "forward"],
+    description: "forward the currently playing song.",
+    category: "Music",
+    options: [
+        {
+            name: "seconds",
+            description: "How many seconds to forward?",
+            type: ApplicationCommandOptionType.Integer,
+            required: false,
+            min_value: 1
+        }
+    ],
+    run: async (client, interaction) => {
+		const player = client.manager.players.get(interaction.guild.id);
+		if (!player) return interaction.reply(`No playing in this guild!`);
+        const { channel } = interaction.member.voice;
+        if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.reply(`I'm not in the same voice channel as you!`);
+
+        const value = interaction.options.getInteger("seconds");
 
         const song = player.queue.current;
         const CurrentDuration = formatDuration(player.position);
 
-		if (args[0] && !isNaN(args[0])) {
-			if((player.position + args[0] * 1000) < song.length) {
-                await player.seek(player.position + args[0] * 1000);
+		if (value && !isNaN(value)) {
+			if((player.position + value * 1000) < song.length) {
+                await player.seek(player.position + value * 1000);
                 
                 const embed = new EmbedBuilder()
                     .setDescription(`\`⏭\` | *Forward to:* \`${CurrentDuration}\``)
                     .setColor(client.color);
 
-                message.reply({ content: " ", embeds: [embed] });
+                interaction.reply({ content: " ", embeds: [embed] });
 			} else { 
-                return message.reply(`You can't forward more than the duration of the song!`);
+                return interaction.reply(`You can't forward more than the duration of the song!`);
             }
-		} else if (args[0] && isNaN(args[0])) { 
-            return message.reply(`Please enter a number!`);
+		} else if (value && isNaN(value)) { 
+            return interaction.reply(`Please enter a number!`);
         }
 
-		if (!args[0]) {
+		if (!value) {
 			if((player.position + fastForwardNum * 1000) < song.length) {
                 await player.seek(player.position + fastForwardNum * 1000);
                 
@@ -44,9 +51,9 @@ module.exports = {
                     .setDescription(`\`⏭\` | *Forward to:* \`${CurrentDuration}\``)
                     .setColor(client.color);
 
-                message.reply({ content: " ", embeds: [embed] });
+                interaction.reply({ content: " ", embeds: [embed] });
 			} else {
-				return message.reply(`You can't forward more than the duration of the song!`);
+				return interaction.reply(`You can't forward more than the duration of the song!`);
 			}
 		}
 	}

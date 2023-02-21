@@ -1,17 +1,14 @@
 const { EmbedBuilder } = require('discord.js');
 
 module.exports = { 
-    config: {
-        name: "replay",
-        description: "Replay current song!",
-        accessableby: "Member",
-        category: "Music"
-    },
-    run: async (client, message, args) => {
-		const player = client.manager.players.get(message.guild.id);
-		if (!player) return message.reply(`No playing in this guild!`);
-        const { channel } = message.member.voice;
-        if (!channel || message.member.voice.channel !== message.guild.members.me.voice.channel) return message.reply(`I'm not in the same voice channel as you!`);
+    name: ["music", "replay"],
+    description: "Replay the current song!",
+    category: "Music",
+    run: async (client, interaction) => {
+		const player = client.manager.players.get(interaction.guild.id);
+		if (!player) return interaction.reply(`No playing in this guild!`);
+        const { channel } = interaction.member.voice;
+        if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.reply(`I'm not in the same voice channel as you!`);
 
         await player.seek(0);
 
@@ -19,6 +16,6 @@ module.exports = {
             .setDescription("`⏮` | *Song has been:* `Replayed`")
             .setColor(client.color);
 
-        return message.reply({ embeds: [embed] });
+        return interaction.reply({ embeds: [embed] });
     }
 }

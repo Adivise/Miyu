@@ -16,10 +16,10 @@ const NormalPage = async (client, message, pages, timeout, queueLength, queueDur
         .addComponents(row1, row2)
 
     let page = 0;
-    const curPage = await message.channel.send({ embeds: [pages[page].setFooter({ text: `Page • ${page + 1}/${pages.length} | ${queueLength} • Song/s | ${queueDuration} • Total Duration` })], components: [row], allowedMentions: { repliedUser: false } });
+    const curPage = await message.editReply({ embeds: [pages[page].setFooter({ text: `Page • ${page + 1}/${pages.length} | ${queueLength} • Song/s | ${queueDuration} • Total Duration` })], components: [row], allowedMentions: { repliedUser: false } });
     if(pages.length == 0) return;
-
-    const filter = (interaction) => interaction.user.id === message.author.id ? true : false && interaction.deferUpdate();
+    
+    const filter = (m) => m.user.id === message.user.id;
     const collector = await curPage.createMessageComponentCollector({ filter, time: timeout });
 
     collector.on('collect', async (interaction) => {
