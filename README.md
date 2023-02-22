@@ -78,7 +78,8 @@ NODE_NAME=NanoSpace
 NODE_URL=localhost:5555
 NODE_AUTH=nanospace
 ```
-	
+Don't forget to do `node deploySlash.js global` to deploy slash commands
+
 After installation or finishes all you can use `node .` to start the bot. or `Run Start.bat`
 
 </p>
