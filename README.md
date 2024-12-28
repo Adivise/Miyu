@@ -39,7 +39,7 @@
 
 - Node.js+ **[Download](https://nodejs.org/en/download/)**
 - Discord Bot Token **[Guide](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot)**
-- LavaLink **[Guide](https://github.com/freyacodes/lavalink)** (*Work on lavalink v3 only*)
+- LavaLink **[Guide](https://github.com/freyacodes/lavalink)** (*Work on lavalink v4 only*)
 
 ## 🛑 Super Requirements 
 
