@@ -13,8 +13,6 @@ module.exports = {
         if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.editReply(`I'm not in the same voice channel as you!`);
 
         const data = {
-            op: 'filters',
-            guildId: interaction.guild.id,
             vibrato: {
                 frequency: 4.0,
                 depth: 0.75
@@ -25,7 +23,7 @@ module.exports = {
             },
         }
 
-        await player.send(data);
+        await player.shoukaku.setFilters(data);
 
         const embed = new EmbedBuilder()
             .setDescription(`\`💠\` | *Turned on:* \`Vibrato\``)

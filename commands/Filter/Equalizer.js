@@ -31,11 +31,8 @@ module.exports = {
 			return interaction.reply({ embeds: [embed] });
 			
 		} else if (value == 'off' || value == 'reset') {
-			const data = {
-                op: 'filters',
-                guildId: interaction.guild.id,
-			}
-			return await player.send(data);
+			const data = {}
+			return await player.shoukaku.setFilters(data);
 		}
 
 		const bands = args.join(' ').split(/[ ]+/);
@@ -49,13 +46,11 @@ module.exports = {
 		for (let i = 0; i < bands.length; i++) {
 			if (i > 13) break;
 			const data = {
-                op: 'filters',
-                guildId: interaction.guild.id,
                 equalizer: [
 					{ band: i, gain: (bands[i]) / 10 },
                 ]
             }
-			await player.send(data);
+			await player.shoukaku.setFilters(data);
 			bandsStr += `${bands[i]} `;
 		}
 	

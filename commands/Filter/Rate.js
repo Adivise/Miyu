@@ -25,12 +25,10 @@ module.exports = {
 		const value = interaction.options.getInteger('amount');
 
 		const data = {
-			op: 'filters',
-			guildId: interaction.guild.id,
 			timescale: { rate: value },
 		}
 
-		await player.send(data);
+		await player.shoukaku.setFilters(data);
 		
 		const embed = new EmbedBuilder()
 			.setDescription(`\`💠\` | *Rate set to:* \`${value}\``)

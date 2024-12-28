@@ -12,12 +12,10 @@ module.exports = {
         const { channel } = interaction.member.voice;
         if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.editReply(`I'm not in the same voice channel as you!`);
 
-		await player.setVolume(500);
-        const data = {
-            op: 'filters',
-            guildId: interaction.guild.id,
-        }
-        await player.send(data);
+        const data = {}
+
+        await player.setVolume(500);
+        await player.shoukaku.setFilters(data);
 
         const earrapped = new EmbedBuilder()
             .setDescription(`\`💠\` | *Turned on:* \`Earrape\``)

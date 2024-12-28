@@ -13,8 +13,6 @@ module.exports = {
         if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.editReply(`I'm not in the same voice channel as you!`);
 
         const data = {
-            op: 'filters',
-            guildId: interaction.guild.id,
             timescale: {
                 speed: 1.165,
                 pitch: 1.125,
@@ -22,7 +20,7 @@ module.exports = {
             },
         }
 
-        await player.send(data);
+        await player.shoukaku.setFilters(data);
 
         const nightcored = new EmbedBuilder()
             .setDescription(`\`💠\` | *Turned on:* \`Nightcore\``)

@@ -13,8 +13,6 @@ module.exports = {
         if (!channel || interaction.member.voice.channel !== interaction.guild.members.me.voice.channel) return interaction.editReply(`I'm not in the same voice channel as you!`);
 
         const data = {
-            op: 'filters',
-            guildId: interaction.guild.id,
             equalizer: [
                 { band: 0, gain: 0.2 },
                 { band: 1, gain: 0.3 },
@@ -33,7 +31,7 @@ module.exports = {
             ]
         }
 
-        await player.send(data);
+        await player.shoukaku.setFilters(data);
 
         const sbed = new EmbedBuilder()
             .setDescription(`\`💠\` | *Turned on:* ` + "`SuperBass`")

@@ -25,8 +25,6 @@ module.exports = {
         const value = interaction.options.getInteger('amount');
         if(!value) {
             const data = {
-                op: 'filters',
-                guildId: interaction.guild.id,
                 equalizer: [
                     { band: 0, gain: 0.10 },
                     { band: 1, gain: 0.10 },
@@ -45,7 +43,7 @@ module.exports = {
                 ]
             }
 
-            await player.send(data);
+            await player.shoukaku.setFilters(data);
 
             const embed = new EmbedBuilder()
                 .setDescription("`💠` | *Turned on:* `BassBoost`")
@@ -55,8 +53,6 @@ module.exports = {
             return interaction.editReply({ content: " ", embeds: [embed] });
         } else {
             const data = {
-                op: 'filters',
-                guildId: interaction.guild.id,
                 equalizer: [
                     { band: 0, gain: value / 10 },
                     { band: 1, gain: value / 10 },
@@ -75,7 +71,7 @@ module.exports = {
                 ]
             }
 
-            await player.send(data);
+            await player.shoukaku.setFilters(data);
 
             const embed = new EmbedBuilder()
                 .setDescription(`\`💠\` | *Turned on:* \`Bassboost\` | *Gain:* \`${value}\``)
